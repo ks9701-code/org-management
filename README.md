@@ -2,6 +2,12 @@
 
 A multi-tenant backend service built with FastAPI and MongoDB that supports dynamic organization management with separate MongoDB collections per organization.
 
+## 🌐 Live API
+
+**🔗 Access the live API documentation:** [https://org-management.onrender.com/docs](https://org-management.onrender.com/docs)
+
+The API is deployed and ready to use! You can test all endpoints directly from the Swagger UI.
+
 ## 🏗️ Architecture Overview
 
 ```
@@ -50,6 +56,180 @@ A multi-tenant backend service built with FastAPI and MongoDB that supports dyna
 │  └──────────────────────────────────────┘ │
 └────────────────────────────────────────────┘
 ```
+
+## 🚀 Quick Start - How to Execute
+
+### Step-by-Step Operations Guide
+
+Follow these steps to create, login, update, and delete organizations:
+
+---
+
+### 1️⃣ Create Organization
+
+**Endpoint:** `POST /org/create`  
+**Authentication:** Not required  
+**Live API:** [https://org-management.onrender.com/docs#/organizations/create_organization_org_create_post](https://org-management.onrender.com/docs#/organizations/create_organization_org_create_post)
+
+**Request:**
+```http
+POST https://org-management.onrender.com/org/create
+Content-Type: application/json
+
+{
+  "organization_name": "Acme Corp",
+  "email": "admin@acme.com",
+  "password": "securepassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "organization_name": "Acme Corp",
+  "collection_name": "org_acme_corp",
+  "admin_email": "admin@acme.com",
+  "created_at": "2024-01-01T00:00:00",
+  "updated_at": "2024-01-01T00:00:00"
+}
+```
+
+**Note:** Save the `organization_name` and `email`/`password` - you'll need them for login!
+
+---
+
+### 2️⃣ Login (Get Authorization Token)
+
+**Endpoint:** `POST /admin/login`  
+**Authentication:** Not required  
+**Live API:** [https://org-management.onrender.com/docs#/admin/admin_login_admin_login_post](https://org-management.onrender.com/docs#/admin/admin_login_admin_login_post)
+
+**Request:**
+```http
+POST https://org-management.onrender.com/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@acme.com",
+  "password": "securepassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "admin_id": "507f1f77bcf86cd799439011",
+  "organization_id": "507f191e810c19729de860ea",
+  "organization_name": "Acme Corp"
+}
+```
+
+**⚠️ Important:** Copy the `access_token` - you'll need it for update and delete operations!
+
+---
+
+### 3️⃣ Update Organization
+
+**Endpoint:** `PUT /org/update`  
+**Authentication:** ✅ **REQUIRED** (Bearer token)  
+**Live API:** [https://org-management.onrender.com/docs#/organizations/update_organization_org_update_put](https://org-management.onrender.com/docs#/organizations/update_organization_org_update_put)
+
+**Authorization Process:**
+1. First, login using Step 2️⃣ to get your `access_token`
+2. Include the token in the Authorization header: `Bearer <your-token>`
+
+**Request:**
+```http
+PUT https://org-management.onrender.com/org/update
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{
+  "organization_name": "Acme Corp",
+  "email": "newadmin@acme.com",
+  "password": "newpassword123",
+  "new_organization_name": "Updated Corp Name"
+}
+```
+
+**⚠️ Important Notes:**
+- **You must provide a NEW email** - the `email` field is required and should be different from the current email
+- `organization_name` must match your current organization name (the one you logged in with)
+- `password` is the new password you want to set
+- `new_organization_name` is optional - only include if you want to rename the organization
+
+**Response:**
+```json
+{
+  "organization_name": "Updated Corp Name",
+  "collection_name": "org_updated_corp_name",
+  "admin_email": "newadmin@acme.com",
+  "created_at": "2024-01-01T00:00:00",
+  "updated_at": "2024-01-01T00:00:01"
+}
+```
+
+**Using Swagger UI:**
+1. Go to [https://org-management.onrender.com/docs](https://org-management.onrender.com/docs)
+2. Click the **"Authorize"** button (🔒 lock icon at the top)
+3. Enter: `Bearer <your-access-token>` (include the word "Bearer" and a space)
+4. Click "Authorize" then "Close"
+5. Now you can use the update endpoint - it will automatically include your token
+
+---
+
+### 4️⃣ Delete Organization
+
+**Endpoint:** `DELETE /org/delete?organization_name=<name>`  
+**Authentication:** ✅ **REQUIRED** (Bearer token)  
+**Live API:** [https://org-management.onrender.com/docs#/organizations/delete_organization_org_delete_delete](https://org-management.onrender.com/docs#/organizations/delete_organization_org_delete_delete)
+
+**Authorization Process:**
+1. First, login using Step 2️⃣ to get your `access_token`
+2. Include the token in the Authorization header: `Bearer <your-token>`
+
+**Request:**
+```http
+DELETE https://org-management.onrender.com/org/delete?organization_name=Acme Corp
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response:**
+```json
+{
+  "message": "Organization 'Acme Corp' deleted successfully"
+}
+```
+
+**Note:** You can only delete your own organization (the one you logged in with).
+
+---
+
+### 5️⃣ Get Organization (Optional)
+
+**Endpoint:** `GET /org/get?organization_name=<name>`  
+**Authentication:** Not required  
+**Live API:** [https://org-management.onrender.com/docs#/organizations/get_organization_org_get_get](https://org-management.onrender.com/docs#/organizations/get_organization_org_get_get)
+
+**Request:**
+```http
+GET https://org-management.onrender.com/org/get?organization_name=Acme Corp
+```
+
+**Response:**
+```json
+{
+  "organization_name": "Acme Corp",
+  "collection_name": "org_acme_corp",
+  "admin_email": "admin@acme.com",
+  "created_at": "2024-01-01T00:00:00",
+  "updated_at": "2024-01-01T00:00:00"
+}
+```
+
+---
 
 ## 🚀 Features
 
@@ -139,84 +319,13 @@ The API will be available at: `http://localhost:8000`
 
 ### 6. Access API Documentation
 
+**Local Development:**
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-## 📡 API Endpoints
-
-### 1. Create Organization
-```http
-POST /org/create
-Content-Type: application/json
-
-{
-  "organization_name": "Acme Corp",
-  "email": "admin@acme.com",
-  "password": "securepassword123"
-}
-```
-
-**Response:**
-```json
-{
-  "organization_name": "Acme Corp",
-  "collection_name": "org_acme_corp",
-  "admin_email": "admin@acme.com",
-  "created_at": "2024-01-01T00:00:00",
-  "updated_at": "2024-01-01T00:00:00"
-}
-```
-
-### 2. Get Organization
-```http
-GET /org/get?organization_name=Acme Corp
-```
-
-### 3. Update Organization
-```http
-PUT /org/update
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "organization_name": "Acme Corp",
-  "email": "newadmin@acme.com",
-  "password": "newpassword123"
-}
-```
-
-### 4. Delete Organization
-```http
-DELETE /org/delete
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "organization_name": "Acme Corp"
-}
-```
-
-### 5. Admin Login
-```http
-POST /admin/login
-Content-Type: application/json
-
-{
-  "email": "admin@acme.com",
-  "password": "securepassword123"
-}
-```
-
-**Response:**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer",
-  "admin_id": "507f1f77bcf86cd799439011",
-  "organization_id": "507f191e810c19729de860ea",
-  "organization_name": "Acme Corp"
-}
-```
+**Live Production:**
+- **Swagger UI**: [https://org-management.onrender.com/docs](https://org-management.onrender.com/docs)
+- **ReDoc**: [https://org-management.onrender.com/redoc](https://org-management.onrender.com/redoc)
 
 ## 🧪 Testing
 
@@ -418,8 +527,9 @@ For production at scale, consider:
    - Your API will be available at: `https://your-app-name.onrender.com`
 
 7. **Access Your API**
-   - API Docs: `https://your-app-name.onrender.com/docs`
-   - Health Check: `https://your-app-name.onrender.com/health`
+   - **Live API Docs**: [https://org-management.onrender.com/docs](https://org-management.onrender.com/docs)
+   - **Health Check**: [https://org-management.onrender.com/health](https://org-management.onrender.com/health)
+   - **Root Endpoint**: [https://org-management.onrender.com/](https://org-management.onrender.com/)
 
 **Note**: Free tier services spin down after 15 minutes of inactivity. First request may take 30-60 seconds to wake up.
 
