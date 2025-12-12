@@ -374,6 +374,61 @@ For production at scale, consider:
   - Enable MongoDB authentication
   - Implement refresh tokens
 
+## 🚀 Deployment
+
+### Deploy to Render
+
+1. **Push your code to GitHub** (already done ✅)
+
+2. **Go to Render Dashboard**
+   - Visit: https://dashboard.render.com
+   - Sign up/Login with your GitHub account
+
+3. **Create a New Web Service**
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository: `ks9701-code/org-management`
+   - Select the repository
+
+4. **Configure the Service**
+   - **Name**: `org-management-service` (or your choice)
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Plan**: Free tier is fine for testing
+
+5. **Set Environment Variables**
+   Click "Add Environment Variable" and add:
+   ```
+   APP_NAME=Org Management Service
+   JWT_SECRET=<generate-a-secure-random-32-char-string>
+   JWT_ALGO=HS256
+   JWT_EXPIRE_MINUTES=1440
+   MONGO_URI=<your-mongodb-atlas-connection-string>
+   MASTER_DB=master_db
+   ```
+   
+   **To generate JWT_SECRET:**
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   ```
+
+6. **Deploy**
+   - Click "Create Web Service"
+   - Render will build and deploy your app
+   - Your API will be available at: `https://your-app-name.onrender.com`
+
+7. **Access Your API**
+   - API Docs: `https://your-app-name.onrender.com/docs`
+   - Health Check: `https://your-app-name.onrender.com/health`
+
+**Note**: Free tier services spin down after 15 minutes of inactivity. First request may take 30-60 seconds to wake up.
+
+### Alternative: Manual Setup (without render.yaml)
+
+If you prefer manual setup, you can use the `render.yaml` file:
+- Render will automatically detect it
+- You'll still need to set `MONGO_URI` and `JWT_SECRET` manually in the dashboard
+
 ## 📝 License
 
 This project is created for educational/assignment purposes.
@@ -388,5 +443,5 @@ For issues or questions, please open an issue on GitHub.
 
 ---
 
-**Built with ❤️ using FastAPI and MongoDB**
+**Built with using FastAPI and MongoDB**
 

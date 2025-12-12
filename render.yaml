@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: org-management-service
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_NAME
+        value: Org Management Service
+      - key: JWT_ALGO
+        value: HS256
+      - key: JWT_EXPIRE_MINUTES
+        value: 1440
+      - key: MASTER_DB
+        value: master_db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
