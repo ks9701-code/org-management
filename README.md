@@ -16,50 +16,60 @@ This service is hosted on Render’s free plan, which spins down after inactivit
 The first request may take ~30–60 seconds to start the server (cold start).
 Subsequent requests will be fast once the service is active.
 
-🏗️ Architecture Overview
-┌─────────────┐
-│   Client    │
-│ (Postman /  │
-│ Frontend)   │
-└──────┬──────┘
-       │ HTTP / REST
-       ▼
-┌──────────────────────────────────────────┐
-│          FastAPI Application              │
-│ ┌──────────────────────────────────────┐ │
-│ │ API Routes                           │ │
-│ │  - /org/create                       │ │
-│ │  - /org/get                          │ │
-│ │  - /org/update                       │ │
-│ │  - /org/delete                       │ │
-│ │  - /admin/login                      │ │
-│ └──────────┬───────────────────────────┘ │
-│            │                               │
-│ ┌──────────▼───────────────────────────┐ │
-│ │ Services Layer                       │ │
-│ │  - OrganizationService              │ │
-│ │  - AuthService                      │ │
-│ └──────────┬───────────────────────────┘ │
-│            │                               │
-│ ┌──────────▼───────────────────────────┐ │
-│ │ Core Utilities                       │ │
-│ │  - JWT & Bcrypt Security             │ │
-│ │  - Database Connection               │ │
-│ └──────────┬───────────────────────────┘ │
-└────────────┼─────────────────────────────┘
-             │ MongoDB Connection
-             ▼
-┌──────────────────────────────────────────┐
-│        MongoDB Atlas (Master DB)          │
-│ ┌──────────────────────────────────────┐ │
-│ │ Collections                           │ │
-│ │  - organizations (metadata)           │ │
-│ │  - admin_users (credentials)          │ │
-│ │  - org_acme_corp (dynamic)            │ │
-│ │  - org_test_inc (dynamic)             │ │
-│ │  - org_* (one per organization)       │ │
-│ └──────────────────────────────────────┘ │
-└──────────────────────────────────────────┘
+
+## Architecture Overview
+
+### Client Layer
+- Postman or any Frontend application
+- Communicates with the backend via HTTP / REST APIs
+
+---
+
+### Backend Layer (FastAPI Application)
+
+#### API Routes
+- `POST /org/create` – Create a new organization
+- `GET /org/get` – Fetch organization details
+- `PUT /org/update` – Update organization information
+- `DELETE /org/delete` – Delete an organization
+- `POST /admin/login` – Admin authentication and token generation
+
+---
+
+#### Services Layer
+- **OrganizationService**
+  - Handles organization creation, update, retrieval, and deletion
+  - Manages dynamic MongoDB collection creation and migration
+- **AuthService**
+  - Handles admin authentication
+  - Generates and validates JWT tokens
+
+---
+
+#### Core Utilities
+- **JWT Authentication**
+  - Secure, token-based access control
+- **Bcrypt Security**
+  - Password hashing and verification
+- **Database Connection**
+  - Centralized MongoDB connection handling
+
+---
+
+### Database Layer (MongoDB Atlas – Master Database)
+
+#### Collections
+- `organizations`
+  - Stores organization metadata
+- `admin_users`
+  - Stores admin credentials and organization mapping
+- `org_<organization_name>`
+  - Dynamically created collection
+  - One collection per organization
+---
+
+
+
 
 🚀 Quick Start – How to Execute
 Step-by-Step Workflow
